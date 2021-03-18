@@ -23,7 +23,7 @@ import numpy as np
 import sys
 
 def ReadList(list_file):
- f=open(list_file,"r")
+ f=open(list_file,"r",encoding="utf8", errors='ignore')#, encoding="utf8")
  lines=f.readlines()
  list_sig=[]
  for x in lines:
@@ -46,6 +46,7 @@ list_file=sys.argv[3]
 
 # Read List file
 list_sig=ReadList(list_file)
+list_sig = [x.upper() for x in list_sig] 
 
 # Replicate input folder structure to output folder
 copy_folder(in_folder,out_folder)
@@ -63,8 +64,12 @@ for i in range(len(list_sig)):
  signal=signal/np.max(np.abs(signal))
 
  # Read wrd file
- wrd_file=wav_file.replace(".wav",".wrd")
+ #print(wav_file)
+ wrd_file=wav_file.replace(".WAV",".WRD")
+ #print(wrd_file)
  wrd_sig=ReadList(wrd_file)
+ #print(wrd_sig[0].split(' '))
+ #print(wrd_sig[0].split(' ')[0])
  beg_sig=int(wrd_sig[0].split(' ')[0])
  end_sig=int(wrd_sig[-1].split(' ')[1])
  
