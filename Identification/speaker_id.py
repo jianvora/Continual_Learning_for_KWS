@@ -97,10 +97,10 @@ class AdditiveMarginSoftmax(nn.Module):
         return log
 
 
-def main_func():
+def main_func(options):
 
     # Reading cfg file
-    options=read_conf()
+    #options=read_conf()
 
 
     #[data]

@@ -186,7 +186,7 @@ get_ipython().system('mkdir dataset1')
 # In[44]:
 
 
-cd dataset1/
+#cd dataset1/
 
 
 # In[45]:
@@ -385,9 +385,12 @@ def final_func():
     print(new_model.evaluate(X_validation, y_validation))
     new_model.save_weights('new_weights.h5')
 
+    y_pred = new_model.predict(X_test)
+    
+    return y_pred, y_test
 
     # In[26]:
 
 
-    files.download('new_weights.h5') 
+    #files.download('new_weights.h5') 
 
