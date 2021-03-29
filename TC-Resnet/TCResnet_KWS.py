@@ -175,33 +175,6 @@ files.download('weights.h5')
 """
 
 
-# In[14]:
-
-
-# Make a bottle neck model
-
-original_model    = get_tc_resnet_8((321, 40), 30, 1.5) #model corresponding to kws on google speech cmds: input length, num_channel, num_classes
-original_model.load_weights('weights.h5') #Assuming this file is loaded in the current working dir
-bottleneck_input  = original_model.get_layer(index=0).input
-print(bottleneck_input)
-bottleneck_output = original_model.get_layer(index=-2).output
-print(bottleneck_output)
-bottleneck_model  = Model(inputs=bottleneck_input,outputs=bottleneck_output)
-
-
-# In[22]:
-
-
-# Add the last softmax layer
-for layer in bottleneck_model.layers:
-    layer.trainable = False
-
-new_model = Sequential()
-new_model.add(bottleneck_model)
-kws_classes = 100
-new_model.add(Dense(kws_classes, activation="softmax", input_dim=2808))
-
-
 # Following 5 cells to load the Competition dataset (train)
 
 # In[16]:
@@ -255,10 +228,6 @@ def __load_background_noises__(root_folder):
         samples, sr = librosa.load(join(noise_folder, item), sr=None)
         noises.append(samples)
     return noises
-
-
-noises = __load_background_noises__('dataset1/train')
-
 
 def generate_noisy_sample(samples, noise):
     samples_length = len(samples)
@@ -369,28 +338,56 @@ def load_new_data_from_folder(root_folder):
     y_validation = np.array(y_validation)
     return X_train, y_train, X_test, y_test, X_validation, y_validation, classes
 
-X_train, y_train, X_test, y_test, X_validation, y_validation, classes = load_new_data_from_folder('dataset1/train')
-num_classes = len(classes)
-(num_train, input_length, num_channel) = X_train.shape
-num_test = X_test.shape[0]
-num_validation = X_validation.shape[0]
-print(num_classes)
-print(num_train)
-print(num_test)
-print(num_validation)
+# In[14]:
+
+def final_func():
+    # Make a bottle neck model
+
+    original_model    = get_tc_resnet_8((321, 40), 30, 1.5) #model corresponding to kws on google speech cmds: input length, num_channel, num_classes
+    original_model.load_weights('weights.h5') #Assuming this file is loaded in the current working dir
+    bottleneck_input  = original_model.get_layer(index=0).input
+    print(bottleneck_input)
+    bottleneck_output = original_model.get_layer(index=-2).output
+    print(bottleneck_output)
+    bottleneck_model  = Model(inputs=bottleneck_input,outputs=bottleneck_output)
 
 
-# In[23]:
+    # In[22]:
 
 
-new_model.compile(optimizer=Adam(),loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-new_model.fit(x=X_train, y=y_train, batch_size=512, epochs=500, validation_data=(X_test, y_test))
-print(new_model.evaluate(X_validation, y_validation))
-new_model.save_weights('new_weights.h5')
+    # Add the last softmax layer
+    for layer in bottleneck_model.layers:
+        layer.trainable = False
+
+    new_model = Sequential()
+    new_model.add(bottleneck_model)
+    kws_classes = 100
+    new_model.add(Dense(kws_classes, activation="softmax", input_dim=2808))
+
+    noises = __load_background_noises__('dataset1/train')
+
+    X_train, y_train, X_test, y_test, X_validation, y_validation, classes = load_new_data_from_folder('dataset1/train')
+    num_classes = len(classes)
+    (num_train, input_length, num_channel) = X_train.shape
+    num_test = X_test.shape[0]
+    num_validation = X_validation.shape[0]
+    print(num_classes)
+    print(num_train)
+    print(num_test)
+    print(num_validation)
 
 
-# In[26]:
+    # In[23]:
 
 
-files.download('new_weights.h5') 
+    new_model.compile(optimizer=Adam(),loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    new_model.fit(x=X_train, y=y_train, batch_size=512, epochs=500, validation_data=(X_test, y_test))
+    print(new_model.evaluate(X_validation, y_validation))
+    new_model.save_weights('new_weights.h5')
+
+
+    # In[26]:
+
+
+    files.download('new_weights.h5') 
 
