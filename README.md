@@ -1,7 +1,9 @@
 # For running experiments on our dataset (Auto-KWS)
 
 Download train.zip from ( https://drive.google.com/drive/folders/12xsjNKHriCViExHLfMKJo4P55q36fSbY?usp=sharing )
+
 Extract the zip file to get a ( train ) folder in the same directory
+
 Run ( python3 speaker_id.py --cfg=cfg/AKS_m065.cfg ) from the same directory
 
 # Additive Margin SincNet (AM-SincNet)
