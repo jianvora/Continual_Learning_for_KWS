@@ -304,10 +304,9 @@ def kws_final_func(test_dir):
     filenames.extend(class_filenames)
     dataset_size = len(filenames)
     results = test_process_file(filenames)
-    print(size(results))
-    for item in results:
-        X_test.append(item)
-    X_test = np.array(X_test)
+    #for item in results:
+    #    X_test.append(item)
+    X_test = np.array(results)
     
     y_pred = new_model.predict(X_test)
 
