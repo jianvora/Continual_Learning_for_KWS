@@ -294,17 +294,6 @@ def kws_final_func(test_dir):
     new_model = Sequential()
     new_model.add(bottleneck_model)
     kws_classes = 100
-    new_model.add(Dense(kws_classes, activation="softmax", input_dim=2808))_8((321, 40), 30, 1.5) #model corresponding to kws on google speech cmds: input length, num_channel, num_classes
-    bottleneck_input  = original_model.get_layer(index=0).input
-    bottleneck_output = original_model.get_layer(index=-2).output
-    bottleneck_model  = Model(inputs=bottleneck_input,outputs=bottleneck_output)
-    # Add the last softmax layer
-    for layer in bottleneck_model.layers:
-        layer.trainable = False
-
-    new_model = Sequential()
-    new_model.add(bottleneck_model)
-    kws_classes = 100
     new_model.add(Dense(kws_classes, activation="softmax", input_dim=2808))
     new_model.load_weights('new_weights.h5') #pre-trained model
 
