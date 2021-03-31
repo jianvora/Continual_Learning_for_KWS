@@ -184,13 +184,18 @@ def test_process_file(filenames):
 
 def __load_new_audio_filenames_with_class__(root_folder):
     classes = [item for item in listdir(root_folder) if item.startswith('T')] #classes as "T00xx"
+    classes.sort()
+    classes.append('others')
     filenames = []
     class_ids = []
-    for i in range(len(classes)):
+    for i in range(len(classes)-1):
         c = classes[i] 
         class_filenames = __load_new_audio_filenames__((join(root_folder, c, "enrollment"))) #location of wav files for kws
         filenames.extend(class_filenames)
         class_ids.extend([i] * len(class_filenames))
+        class_filenames = __load_new_audio_filenames__((join(root_folder, c, "others"))) #location of wav files for kws
+        filenames.extend(class_filenames)
+        class_ids.extend([len(classes)-1] * len(class_filenames))        
     return filenames, class_ids, classes
 
 
@@ -293,7 +298,7 @@ def kws_final_func(test_dir):
 
     new_model = Sequential()
     new_model.add(bottleneck_model)
-    kws_classes = 100
+    kws_classes = 101
     new_model.add(Dense(kws_classes, activation="softmax", input_dim=2808))
     new_model.load_weights('new_weights.h5') #pre-trained model
 

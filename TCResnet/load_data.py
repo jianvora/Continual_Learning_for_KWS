@@ -9,16 +9,20 @@ import librosa
 from random import randint
 
 
-def __load_audio_filenames_with_class__(root_folder):
-    classes = [item for item in listdir(root_folder) if isdir(
-        join(root_folder, item)) and not item.startswith('_')]
+def __load_new_audio_filenames_with_class__(root_folder):
+    classes = [item for item in listdir(root_folder) if item.startswith('T')] #classes as "T00xx"
+    classes.sort()
+    classes.append('others')
     filenames = []
     class_ids = []
-    for i in range(len(classes)):
-        c = classes[i]
-        class_filenames = __load_audio_filenames__(join(root_folder, c, "enrollment"))
+    for i in range(len(classes)-1):
+        c = classes[i] 
+        class_filenames = __load_new_audio_filenames__((join(root_folder, c, "enrollment"))) #location of wav files for kws
         filenames.extend(class_filenames)
         class_ids.extend([i] * len(class_filenames))
+        class_filenames = __load_new_audio_filenames__((join(root_folder, c, "others"))) #location of wav files for kws
+        filenames.extend(class_filenames)
+        class_ids.extend([len(classes)-1] * len(class_filenames))        
     return filenames, class_ids, classes
 
 
