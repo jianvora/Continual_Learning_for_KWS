@@ -4,5 +4,5 @@ from .TCResnet.TCResnet_KWS import kws_final_func
 
 #options = read_conf()
 
-kws_softmax = Kws_final_func()
+kws_softmax = kws_final_func()
 spkid_softmax = main_func()
