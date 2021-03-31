@@ -1,69 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-#!git clone https://github.com/hyperconnect/TC-ResNet.git
-#!pip3 install -r ./TC-ResNet/requirements/py36-gpu.txt
-
-
-# In[2]:
-
-
-#cd TC-ResNet/
-
-
-# In[3]:
-
-
-# train model
-#! ./scripts/commands/TCResNet8Model-1.0_mfcc_40_3010_0.001_mom_l1.sh
-
-
-# In[4]:
-
-
-
-# In[5]:
-
-
-
-# Uncomment following 5 cells to load google speech dataset
-
-# In[6]:
-
-
-#!mkdir dataset
-
-
-# In[7]:
-
-
-#cd dataset/
-
-
-# In[8]:
-
-
-#!wget http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
-
-
-# In[9]:
-
-
-#!tar xvf speech_commands_v0.01.tar.gz
-
-
-# In[10]:
-
-
-#cd ..
-
-
-# In[25]:
-
-
 from os import listdir
 from os.path import join, isfile, isdir, normpath
 from multiprocessing import Pool, cpu_count
@@ -81,10 +15,6 @@ from keras.callbacks import ModelCheckpoint
 from keras.models import Model, Sequential
 from keras.layers import Input, Conv1D, ReLU, BatchNormalization, Add, AveragePooling1D, Dense, Flatten, Dropout, Activation
 from google.colab import files
-
-
-# In[12]:
-
 
 # To train entire tc-resnet--uncomment
 """
@@ -175,45 +105,6 @@ files.download('weights.h5')
 """
 
 
-# Following 5 cells to load the Competition dataset (train)
-
-# In[16]:
-
-
-get_ipython().system('mkdir dataset1')
-
-
-# In[44]:
-
-
-#cd dataset1/
-
-
-# In[45]:
-
-
-get_ipython().system('gdown --id 1w4Bn038sLxuv9PKswk2KorCUmgPNup3c')
-
-
-# In[ ]:
-
-
-get_ipython().system('unzip train.zip')
-
-
-# In[47]:
-
-
-cd ..
-
-
-# Load the _background_noise folder in dataset1/train
-# 
-
-# In[17]:
-
-
-
 AUDIO_LENGTH = 2
 
 seed(163)
@@ -275,8 +166,20 @@ def process_file(argv):
             results.append(mfcc)
     return results, filepath, class_id, random_roll
 
-
-# In[20]:
+def test_process_file(argv):
+    (filepath) = argv
+    results = []
+    samples, sr = librosa.load(filepath, sr=None)
+    samples_len = len(samples)
+    if (samples_len > sr * AUDIO_LENGTH):
+        samples = samples[- sr * AUDIO_LENGTH:]
+    elif (samples_len < sr * AUDIO_LENGTH):
+        temp = np.zeros((sr * AUDIO_LENGTH))
+        temp[:samples_len] = samples
+        samples = temp
+    mfcc = get_mfcc(samples, sr)
+    results.append(mfcc)
+    return results, filepath
 
 
 def __load_new_audio_filenames_with_class__(root_folder):
@@ -338,10 +241,7 @@ def load_new_data_from_folder(root_folder):
     y_validation = np.array(y_validation)
     return X_train, y_train, X_test, y_test, X_validation, y_validation, classes
 
-# In[14]:
-
 def final_func():
-    # Make a bottle neck model
 
     original_model    = get_tc_resnet_8((321, 40), 30, 1.5) #model corresponding to kws on google speech cmds: input length, num_channel, num_classes
     original_model.load_weights('weights.h5') #Assuming this file is loaded in the current working dir
@@ -351,8 +251,6 @@ def final_func():
     print(bottleneck_output)
     bottleneck_model  = Model(inputs=bottleneck_input,outputs=bottleneck_output)
 
-
-    # In[22]:
 
 
     # Add the last softmax layer
@@ -376,10 +274,6 @@ def final_func():
     print(num_test)
     print(num_validation)
 
-
-    # In[23]:
-
-
     new_model.compile(optimizer=Adam(),loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     new_model.fit(x=X_train, y=y_train, batch_size=512, epochs=500, validation_data=(X_test, y_test))
     print(new_model.evaluate(X_validation, y_validation))
@@ -389,8 +283,50 @@ def final_func():
     
     return y_pred, y_test
 
-    # In[26]:
+def kws_final_func(test_dir):
+    original_model    = get_tc_resnet_8((321, 40), 30, 1.5) #model corresponding to kws on google speech cmds: input length, num_channel, num_classes
+    bottleneck_input  = original_model.get_layer(index=0).input
+    bottleneck_output = original_model.get_layer(index=-2).output
+    bottleneck_model  = Model(inputs=bottleneck_input,outputs=bottleneck_output)
+    for layer in bottleneck_model.layers:
+        layer.trainable = False
+
+    new_model = Sequential()
+    new_model.add(bottleneck_model)
+    kws_classes = 100
+    new_model.add(Dense(kws_classes, activation="softmax", input_dim=2808))_8((321, 40), 30, 1.5) #model corresponding to kws on google speech cmds: input length, num_channel, num_classes
+    bottleneck_input  = original_model.get_layer(index=0).input
+    bottleneck_output = original_model.get_layer(index=-2).output
+    bottleneck_model  = Model(inputs=bottleneck_input,outputs=bottleneck_output)
+    # Add the last softmax layer
+    for layer in bottleneck_model.layers:
+        layer.trainable = False
+
+    new_model = Sequential()
+    new_model.add(bottleneck_model)
+    kws_classes = 100
+    new_model.add(Dense(kws_classes, activation="softmax", input_dim=2808))
+    new_model.load_weights('new_weights.h5') #pre-trained model
+
+    # Test data
+    X_test = []
+    filenames = []
+    class_filenames = __load_new_audio_filenames__(test_dir) #location of wav files for kws
+    filenames.extend(class_filenames)
+    dataset_size = len(filenames)
+    for (results, filepath) in tqdm(pool.imap_unordered(test_process_file, zip_longest(filenames)), total=dataset_size):
+        for item in results:
+            X_test.append(item)
+    X_test = np.array(X_test)
+    
+    y_pred = new_model.predict(X_test)
+
+    return y_pred
 
 
-    #files.download('new_weights.h5') 
+
+
+    
+
+
 
