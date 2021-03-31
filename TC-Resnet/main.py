@@ -19,7 +19,7 @@ if __name__=='__main__':
 
     new_model = Sequential()
     new_model.add(bottleneck_model)
-    kws_classes = 100
+    kws_classes = 101
     new_model.add(Dense(kws_classes, activation="softmax", input_dim=2808))
 
     #Split dataset
