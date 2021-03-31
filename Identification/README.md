@@ -1,3 +1,9 @@
+# For integrating in the final step
+
+Download trained model from ( https://drive.google.com/file/d/1fEPeqi9k0ht25X7UKJvGOYuy55R7jBa5/view?usp=sharing ) in same directory
+
+( python3 predict_speaker_id.py --cfg=cfg/AKS_m065.cfg ) for now takes a directory (with only wav files, see the path in the code) as input and prints the predicted labels of all the files. Change this accordingly.
+
 # For running experiments on our dataset (Auto-KWS)
 
 Download train.zip from ( https://drive.google.com/drive/folders/12xsjNKHriCViExHLfMKJo4P55q36fSbY?usp=sharing )
