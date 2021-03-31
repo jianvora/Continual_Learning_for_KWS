@@ -165,19 +165,20 @@ def process_file(argv):
             results.append(mfcc)
     return results, filepath, class_id, random_roll
 
-def test_process_file(filepath):
+def test_process_file(filenames):
     #(filepath) = argv
     results = []
-    samples, sr = librosa.load(filepath, sr=None)
-    samples_len = len(samples)
-    if (samples_len > sr * AUDIO_LENGTH):
-        samples = samples[- sr * AUDIO_LENGTH:]
-    elif (samples_len < sr * AUDIO_LENGTH):
-        temp = np.zeros((sr * AUDIO_LENGTH))
-        temp[:samples_len] = samples
-        samples = temp
-    mfcc = get_mfcc(samples, sr)
-    results.append(mfcc)
+    for filepath in filenames:
+        samples, sr = librosa.load(filepath, sr=None)
+        samples_len = len(samples)
+        if (samples_len > sr * AUDIO_LENGTH):
+            samples = samples[- sr * AUDIO_LENGTH:]
+        elif (samples_len < sr * AUDIO_LENGTH):
+            temp = np.zeros((sr * AUDIO_LENGTH))
+            temp[:samples_len] = samples
+            samples = temp
+        mfcc = get_mfcc(samples, sr)
+        results.append(mfcc)
     return results #, filepath
 
 
@@ -303,6 +304,7 @@ def kws_final_func(test_dir):
     filenames.extend(class_filenames)
     dataset_size = len(filenames)
     results = test_process_file(filenames)
+    print(size(results))
     for item in results:
         X_test.append(item)
     X_test = np.array(X_test)
