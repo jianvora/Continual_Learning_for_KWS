@@ -15,7 +15,6 @@ from keras.callbacks import ModelCheckpoint
 from keras.models import Model, Sequential
 from keras.layers import Input, Conv1D, ReLU, BatchNormalization, Add, AveragePooling1D, Dense, Flatten, Dropout, Activation
 from google.colab import files
-
 # To train entire tc-resnet--uncomment
 """
 from process_data import process_file, generate_noisy_sample
@@ -166,8 +165,8 @@ def process_file(argv):
             results.append(mfcc)
     return results, filepath, class_id, random_roll
 
-def test_process_file(argv):
-    (filepath) = argv
+def test_process_file(filepath):
+    #(filepath) = argv
     results = []
     samples, sr = librosa.load(filepath, sr=None)
     samples_len = len(samples)
@@ -179,7 +178,7 @@ def test_process_file(argv):
         samples = temp
     mfcc = get_mfcc(samples, sr)
     results.append(mfcc)
-    return results, filepath
+    return results #, filepath
 
 
 def __load_new_audio_filenames_with_class__(root_folder):
@@ -303,9 +302,9 @@ def kws_final_func(test_dir):
     class_filenames = __load_new_audio_filenames__(test_dir) #location of wav files for kws
     filenames.extend(class_filenames)
     dataset_size = len(filenames)
-    for (results, filepath) in tqdm(pool.imap_unordered(test_process_file, zip_longest(filenames)), total=dataset_size):
-        for item in results:
-            X_test.append(item)
+    results = test_process_file(filenames)
+    for item in results:
+        X_test.append(item)
     X_test = np.array(X_test)
     
     y_pred = new_model.predict(X_test)
