@@ -1,0 +1,11 @@
+# Continual Learning/ Domain Adaptation
+
+The directory named Experiment 1 assume which split is the test sample coming from. It has scripts for training and evaluating two as well as 3 splits of the following continual learning regularizers -
+
+1. Elastic Weight Consolidation (EWC)
+
+2. Learning Without Forgetting (LWF)
+
+3. Continual Replay Adaptation (CRA)
+
+The directory named Experiment 2 does away with the earlier assumption and can classify directly given a test sample. The naming of the scripts are self-explanatory.
